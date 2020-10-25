@@ -53,7 +53,7 @@ class CLI:
         , pool.value.approx
         , f"(+{pool.gain}/{util.format_as_duration(pool.period)})"
         , ' '*5
-        , f"[{(not pool.rollover) * 'no '}rollover; {(not pool.gradual) * 'not '}gradual]"
+        , f"[{(not pool.capped) * 'not '}capped]"
         ] for pool in pools
       ]))
 
@@ -70,19 +70,21 @@ class CLI:
     name, *,
     period,
     gain,
-    rollover,
-    gradual,
+    capped,
     initial_value = 0,
   ):
     """
     Create a new pool.
-    :param name: the pool name
-    :param period: the gain/rollover period for the pool, e.g. '3*months'
-    :param gain: the value gained per period, e.g. '300'  [default: 0]
-    :param rollover: true iff the pool value persists at the beginning of a period  [default: True]
-    :param gradual: true iff value is the gained continuously over a period rather than all at the beginning  [default: True]
+    :param name: The pool name
+    :param period:
+      The canonical period for the pool, e.g. '3*months'.
+      This has no effect on calculations.
+    :param gain: The value gained per period, e.g. '300'.
+    :param capped:
+      True iff the pool value is to never exceed `gain` (in magnitude).
+      This is the continuous analog to having a non-rollover discrete pool.
     """
-    self._run(f"pools.new({repr(name)}, period={repr(period)}, gain={repr(gain)}, rollover={repr(rollover)}, gradual={repr(gradual)})")
+    self._run(f"pools.new({repr(name)}, period={repr(period)}, gain={repr(gain)}, capped={repr(capped)})")
 
   def take(self, amount, *, out_of, desc):
     """

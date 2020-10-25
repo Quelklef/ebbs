@@ -6,15 +6,13 @@ class Pool:
     value,
     period,
     gain,
-    rollover,
-    gradual,
+    capped,
   ):
     self.name = str(name)
     self.value = Rat(value)
     self.period = Rat(period)
     self.gain = Rat(gain)
-    self.rollover = bool(rollover)
-    self.gradual = bool(gradual)
+    self.capped = bool(capped)
 
   @property
   def rate(self):
@@ -26,20 +24,11 @@ class Pool:
     time_old = Rat(time_old)
     time_new = Rat(time_new)
 
-    if (self.rollover, self.gradual) == (False, False):
-      if time_new // self.period > time_old // self.period:
-        self.value = self.gain
+    self.value += self.rate * (time_new - time_old)
 
-    elif (self.rollover, self.gradual) == (True, False):
-      self.value += (time_new // self.period - time_old // self.period) * self.gain
-
-    elif (self.rollover, self.gradual) == (False, True):
-      if time_new // self.period > time_old // self.period:
-        self.value = 0
-      self.value += self.rate * ((time_new - time_old) % self.period)
-
-    elif (self.rollover, self.gradual) == (True, True):
-      self.value += (time_new - time_old) * self.rate
+    if (  self.gain > 0 and self.value > self.gain
+       or self.gain < 0 and self.value < self.gain):
+      self.value = self.gain
 
 
 class Pools:
@@ -50,8 +39,7 @@ class Pools:
     name, *,
     period,
     gain,
-    rollover,
-    gradual,
+    capped,
   ):
     if name in self._pools:
       raise ValueError(f"There is already a pool named '{name}'")
@@ -61,8 +49,7 @@ class Pools:
       value = 0,
       period = period,
       gain = gain,
-      rollover = rollover,
-      gradual = gradual,
+      capped = capped,
     )
     self._pools[name] = pool
 

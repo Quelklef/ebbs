@@ -1,7 +1,10 @@
+import functools as ft
+
 def _calc_gcd(a, b):
   if b == 0: return a
   return _calc_gcd(b, a % b)
 
+@ft.total_ordering
 class Rat:
   """
   A rational number!
@@ -84,6 +87,9 @@ class Rat:
   def __lt__(self, other):
     other = Rat(other)
     return self._num * other._den < other._num * self._den
+
+  def __abs__(self):
+    return Rat(abs(self._num), abs(self._den))
 
   def __str__(self):
     if self._den == 1:
