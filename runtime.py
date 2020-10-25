@@ -41,9 +41,6 @@ class Pool:
     elif (self.rollover, self.gradual) == (True, True):
       self.value += (time_new - time_old) * self.rate
 
-  def __str__(self):
-    return f"{self.name}: {self.value.approx}, +{self.rate.approx}"
-
 
 class Pools:
   def __init__(self):
@@ -81,18 +78,16 @@ class Pools:
   def __len__(self):
     return len(self._pools)
 
-  def __str__(self):
-    return "\n".join(str(pool) for pool in self._pools.values())
 
-
-# Convenince values for making tims
-seconds = second = 1
-minutes = minute = second * 60
-hours   = hour   = minute * 60
-days    = day    = hour   * 24
-weeks   = week   = day    * 7
-years   = year   = day    * Rat('365.2422')  # the average year
-months  = month  = day    * Rat('365/12')  # the average month
+# Convenince values for making times
+from util import second, minute, hour, day, week, year, month
+seconds = second
+minutes = minute
+hours   = hour
+days    = day
+weeks   = week
+months  = month
+years   = year
 
 pools = Pools()
 

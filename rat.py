@@ -78,9 +78,11 @@ class Rat:
     return self - (self // other) * other
 
   def __eq__(self, other):
+    other = Rat(other)
     return (self._num, self._den) == (other._num, other._den)
 
   def __lt__(self, other):
+    other = Rat(other)
     return self._num * other._den < other._num * self._den
 
   def __str__(self):
@@ -90,7 +92,6 @@ class Rat:
       return f"{self._num}/{self._den}"
 
   @property
-  def approx(self):
-    # As float to two significant places
-    return format(self._num / self._den, '.2g')
+  def as_float(self):
+    return self._num / self._den
 

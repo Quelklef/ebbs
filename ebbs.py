@@ -5,6 +5,8 @@ import time as time_module
 
 import fire
 
+import util
+
 from runtime import *
 
 diary_file_path = 'diary.py'
@@ -33,14 +35,22 @@ class CLI:
       if record:
         self.diary_file.write(full_command)
 
-  def state(self):
+  def view(self):
     """
     View the current state.
     """
     if len(pools) == 0:
       print("No pools. Use `ebbs new_pool` to make one.")
     else:
-      print(pools)
+      pin_now()
+      print(util.format_grid([
+        [ f"{pool.name}:"
+        , pool.value
+        , f"(+{pool.gain}/{util.format_as_duration(pool.period)})"
+        , ' '*5
+        , f"[{(not pool.rollover) * 'no '}rollover; {(not pool.gradual) * 'not '}gradual]"
+        ] for pool in pools
+      ]))
 
   def do(self, command, *, desc, record=True):
     """
