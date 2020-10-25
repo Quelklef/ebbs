@@ -95,3 +95,6 @@ class Rat:
   def as_float(self):
     return self._num / self._den
 
+  @property
+  def approx(self):
+    return format(self.as_float, '.2f')

@@ -50,7 +50,7 @@ class CLI:
       self._pin_now()
       print(util.format_grid([
         [ f"{pool.name}:"
-        , format(pool.value.as_float, '.2f')
+        , pool.value.approx
         , f"(+{pool.gain}/{util.format_as_duration(pool.period)})"
         , ' '*5
         , f"[{(not pool.rollover) * 'no '}rollover; {(not pool.gradual) * 'not '}gradual]"
@@ -82,7 +82,7 @@ class CLI:
     :param rollover: true iff the pool value persists at the beginning of a period  [default: True]
     :param gradual: true iff value is the gained continuously over a period rather than all at the beginning  [default: True]
     """
-    self._run(f"pools.new('{name}', period={period}, gain={gain}, rollover={rollover}, gradual={gradual})")
+    self._run(f"pools.new({repr(name)}, period={repr(period)}, gain={repr(gain)}, rollover={repr(rollover)}, gradual={repr(gradual)})")
 
   def take(self, amount, *, out_of, desc):
     """
@@ -90,7 +90,9 @@ class CLI:
     :param amount: the amount lost
     :param out_of: the name of the pool
     """
-    self._run(f"pools.{out_of}.value -= {amount}", desc=desc)
+    self._run(f"pools.{out_of}.value -= {repr(amount)}", desc=desc)
+    new_val = getattr(pools, out_of).value.approx
+    print(f"Pool {out_of} now at {new_val}")
 
   def put(self, amount, *, into, desc):
     """
@@ -98,7 +100,9 @@ class CLI:
     :param amount: the amount gained
     :param into: the name of the pool
     """
-    self._run(f"pools.{into}.value += {amount}", desc=desc)
+    self._run(f"pools.{into}.value += {repr(amount)}", desc=desc)
+    new_val = getattr(pools, into).value.approx
+    print(f"Pool {into} now at {new_val}")
 
 with open(diary_file_path, 'a') as diary_file:
   fire.Fire(CLI(diary_file))
