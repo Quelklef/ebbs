@@ -13,7 +13,7 @@ def format_as_duration(time_delta):
   Format a time delta (in seconds) as a nicely-readable duration
   """
   time_delta = Rat(time_delta)
-  units = [(second, 's'), (minute, 'm'), (hour, 'h'), (day, 'd'), (week, 'w'), (month, 'm'), (year, 'y'), (float('inf'), 'X')]
+  units = [(second, 'sec'), (minute, 'min'), (hour, 'hr'), (day, 'day'), (week, 'wk'), (month, 'mo'), (year, 'yr'), (float('inf'), 'X')]
   for (unit_val, unit_tag), (next_unit_val, _) in zip(units, units[1:]):
     if time_delta < next_unit_val:
       as_unit = time_delta / unit_val
