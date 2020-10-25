@@ -1,7 +1,7 @@
 import os
 import sys
+import time
 import traceback
-import time as time_module
 
 import fire
 
@@ -26,7 +26,8 @@ class CLI:
 
   def _run(self, user_command, *, desc=None, record=True):
     desc = desc or "(no description)"
-    full_command = f'\n# {desc}\npin_now()\n{user_command}\n'
+    now = int(time.time())
+    full_command = f'\n# {desc}\npin({now})\n{user_command}\n'
     try:
       exec(full_command, globals())
     except Exception:
@@ -35,6 +36,10 @@ class CLI:
       if record:
         self.diary_file.write(full_command)
 
+  def _pin_now(self):
+    now = int(time.time())
+    pin(now)
+
   def view(self):
     """
     View the current state.
@@ -42,10 +47,10 @@ class CLI:
     if len(pools) == 0:
       print("No pools. Use `ebbs new_pool` to make one.")
     else:
-      pin_now()
+      self._pin_now()
       print(util.format_grid([
         [ f"{pool.name}:"
-        , pool.value
+        , format(pool.value.as_float, '.2f')
         , f"(+{pool.gain}/{util.format_as_duration(pool.period)})"
         , ' '*5
         , f"[{(not pool.rollover) * 'no '}rollover; {(not pool.gradual) * 'not '}gradual]"

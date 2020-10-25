@@ -1,5 +1,4 @@
 from rat import Rat
-import time as time_module
 
 class Pool:
   def __init__(self, *,
@@ -36,7 +35,8 @@ class Pool:
 
     elif (self.rollover, self.gradual) == (False, True):
       if time_new // self.period > time_old // self.period:
-        self.value = self.gain * ((time_new % self.period) / self.period)
+        self.value = 0
+      self.value += self.rate * ((time_new - time_old) % self.period)
 
     elif (self.rollover, self.gradual) == (True, True):
       self.value += (time_new - time_old) * self.rate
@@ -91,11 +91,10 @@ years   = year
 
 pools = Pools()
 
-time = 0
+ebbs_time = 0
 
-def pin_now():
-  global time
-  now = int(time_module.time())
+def pin(new_time):
+  global ebbs_time
   for pool in pools:
-    pool._simulate_idle(time, now)
-  time = now
+    pool._simulate_idle(ebbs_time, new_time)
+  ebbs_time = new_time
