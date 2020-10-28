@@ -50,7 +50,7 @@ class CLI:
       self._pin_now()
       print(util.format_grid([
         [ f"{pool.name}:"
-        , pool.value.approx
+        , format(pool.value.evalf(), '.2f')
         , f"(+{pool.gain}/{util.format_as_duration(pool.period)})"
         , ' '*5
         , f"[{(not pool.capped) * 'not '}capped]"
@@ -71,7 +71,6 @@ class CLI:
     period,
     gain,
     capped,
-    initial_value = 0,
   ):
     """
     Create a new pool.
@@ -84,7 +83,7 @@ class CLI:
       True iff the pool value is to never exceed `gain` (in magnitude).
       This is the continuous analog to having a non-rollover discrete pool.
     """
-    self._run(f"pools.new({repr(name)}, period={repr(period)}, gain={repr(gain)}, capped={repr(capped)})")
+    self._run(f"pools.new({repr(name)}, period={period}, gain={repr(gain)}, capped={repr(capped)})")
 
   def take(self, amount, *, out_of, desc):
     """

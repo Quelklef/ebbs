@@ -1,24 +1,24 @@
-from rat import Rat
+from sympy import Rational
 
 second = 1
 minute = second * 60
 hour   = minute * 60
 day    = hour   * 24
 week   = day    * 7
-year   = day    * Rat('365.2422')  # the average year
+year   = day    * Rational('365.2422')  # the average year
 month  = year   / 12  # the average month
 
 def format_as_duration(time_delta):
   """
   Format a time delta (in seconds) as a nicely-readable duration
   """
-  time_delta = Rat(time_delta)
+  time_delta = Rational(time_delta)
   units = [(second, 'sec'), (minute, 'min'), (hour, 'hr'), (day, 'day'), (week, 'wk'), (month, 'mo'), (year, 'yr'), (float('inf'), 'X')]
   for (unit_val, unit_tag), (next_unit_val, _) in zip(units, units[1:]):
     if time_delta < next_unit_val:
       as_unit = time_delta / unit_val
       # Format e.g. '60' as 'm' instead of '1m'
-      if as_unit == Rat(1):
+      if as_unit == 1:
         return unit_tag
       else:
         return format(as_unit.as_float, '.2g') + unit_tag

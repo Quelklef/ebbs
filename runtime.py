@@ -1,4 +1,4 @@
-from rat import Rat
+from sympy import Rational
 
 class Pool:
   def __init__(self, *,
@@ -8,9 +8,9 @@ class Pool:
     capped,
   ):
     self.name = str(name)
-    self.value = Rat(0)
-    self.period = Rat(period)
-    self.gain = Rat(gain)
+    self.value = Rational(0)
+    self.period = Rational(period)
+    self.gain = Rational(gain)
     self.capped = bool(capped)
 
   @property
@@ -20,8 +20,8 @@ class Pool:
   def _simulate_idle(self, time_old, time_new):
     """ Simulate being idle over a given range of time """
 
-    time_old = Rat(time_old)
-    time_new = Rat(time_new)
+    time_old = Rational(time_old)
+    time_new = Rational(time_new)
 
     self.value += self.rate * (time_new - time_old)
 
