@@ -138,7 +138,7 @@ def t(pool, amount, *, desc, distn="instant(t)"):
   distn = str(distn)
 
   shifted_distn = f"sp.Lambda(t, {distn})(t - {now()})"
-  _run(f"pools.{pool}.history.append(Transaction({uneval(amount)}, {shifted_distn}))", desc=desc)
+  _run(f"pools.{pool}.transact({uneval(amount)}, {shifted_distn})", desc=desc)
   view()
 
 

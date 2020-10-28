@@ -36,6 +36,9 @@ class Pool:
     # Transaction history
     self.history = []
 
+  def transact(self, *args, **kwargs):
+    self.history.append(Transaction(*args, **kwargs))
+
   def _simulate_idle(self, time_old, time_new):
     """ Simulate being idle over a given range of time """
 
