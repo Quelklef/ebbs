@@ -26,8 +26,9 @@ class Pool:
 
     self.value += self.rate * (time_new - time_old)
 
-    if (  self.gain > 0 and self.value > self.gain
-       or self.gain < 0 and self.value < self.gain):
+    if (self.capped and
+         (  self.gain > 0 and self.value > self.gain
+         or self.gain < 0 and self.value < self.gain)):
       self.value = self.gain
 
 
