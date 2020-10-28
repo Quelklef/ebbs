@@ -84,26 +84,20 @@ class CLI:
       This is the continuous analog to having a non-rollover discrete pool.
     """
     self._run(f"pools.new({repr(name)}, period={period}, gain={repr(gain)}, capped={repr(capped)})")
+    self.view()
 
-  def take(self, amount, *, out_of, desc):
+  def t(self, pool, amount, *, desc, distn="instant(x)"):
     """
-    Record a loss of value out of a pool.
-    :param amount: the amount lost
-    :param out_of: the name of the pool
+    Record a transaction with a pool.
+    :param amount: the value delta
+    :param pool: the name of the pool
+    :param desc: transaction description
+    :param distn: transaction distribution  [default: "instant(x)"]
     """
-    self._run(f"pools.{out_of}.value -= {repr(amount)}", desc=desc)
-    new_val = getattr(pools, out_of).value.approx
-    print(f"Pool {out_of} now at {new_val}")
-
-  def put(self, amount, *, into, desc):
-    """
-    Record a gain of value into a pool.
-    :param amount: the amount gained
-    :param into: the name of the pool
-    """
-    self._run(f"pools.{into}.value += {repr(amount)}", desc=desc)
-    new_val = getattr(pools, into).value.approx
-    print(f"Pool {into} now at {new_val}")
+    now = int(time.time())
+    shifted_distn = f"sp.Lambda(x, {distn})(x - {now})"
+    self._run(f"pools.{pool}.history.append(Transaction({amount}, {shifted_distn}))", desc=desc)
+    self.view()
 
 with open(diary_file_path, 'a') as diary_file:
   fire.Fire(CLI(diary_file))

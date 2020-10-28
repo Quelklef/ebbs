@@ -1,4 +1,21 @@
 from sympy import Rational
+import sympy as sp
+
+class Transaction:
+  def __init__(
+    self,
+    amount,
+    distribution,
+  ):
+    self.amount = amount
+    self.distribution = distribution
+
+    area = sp.integrate(distribution, (sp.Symbol('x'), -sp.oo, sp.oo))
+    if area != 1:
+      raise ValueError(f"Given distribution is not normalized: {distribution}")
+
+  def __getitem__(self, slice):
+    return self.amount * sp.integrate(self.distribution, (sp.Symbol('x'), slice.start, slice.stop))
 
 class Pool:
   def __init__(self, *,
@@ -8,10 +25,14 @@ class Pool:
     capped,
   ):
     self.name = str(name)
-    self.value = Rational(0)
     self.period = Rational(period)
     self.gain = Rational(gain)
     self.capped = bool(capped)
+
+    # Running value
+    self.value = Rational(0)
+    # Transaction history
+    self.history = []
 
   @property
   def rate(self):
@@ -23,13 +44,17 @@ class Pool:
     time_old = Rational(time_old)
     time_new = Rational(time_new)
 
+    # Latent gain
     self.value += self.rate * (time_new - time_old)
+
+    # Gain from transactions
+    for tx in self.history:
+      self.value += tx[time_old : time_new]
 
     if (self.capped and
          (  self.gain > 0 and self.value > self.gain
          or self.gain < 0 and self.value < self.gain)):
       self.value = self.gain
-
 
 class Pools:
   def __init__(self):
@@ -74,6 +99,15 @@ days    = day
 weeks   = week
 months  = month
 years   = year
+
+# Convenience values for making distributions
+x = sp.Symbol('x')
+# v Point distribution on [0, 0]
+instant = sp.DiracDelta
+# v Exponential distribution on [0, oo)
+exponential = lambda var: sp.Piecewise((0, var < 0), (sp.exp(var), var >= 0))
+# v Uniform distribution on [0, range]
+uniform = lambda var, range: sp.Piecewise((0, var < 0), (0, var > range), (sp.Rational(1, range), True))
 
 pools = Pools()
 

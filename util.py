@@ -21,7 +21,7 @@ def format_as_duration(time_delta):
       if as_unit == 1:
         return unit_tag
       else:
-        return format(as_unit.as_float, '.2g') + unit_tag
+        return format(as_unit.evalf(), '.2g') + unit_tag
 
 def format_grid(grid):
   """
