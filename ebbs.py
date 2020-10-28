@@ -44,7 +44,7 @@ def uneval(value):
   """ Return python code evaluating to a given value """
   # Most of the time, a class's __repr__ method will implement this.
   # However, sympy doesn't seem to follow this convention.
-  defer_to_repr = [str, int]
+  defer_to_repr = [str, int, bool, type(None)]
   if any(isinstance(value, t) for t in defer_to_repr):
     return repr(value)
   elif isinstance(value, sp.Integer):
@@ -81,9 +81,9 @@ def view():
     print(util.format_grid([
       [ f"{pool.name}:"
       , round(pool.value, 2)
-      , f"(+{round(pool.gain, 2)}/{util.format_as_duration(pool.period)})"
+      , f"(+{round(pool.rate * pool.canonical_period, 2)}/{util.format_as_duration(pool.canonical_period)})"
       , ' '*5
-      , f"[{(not pool.capped) * 'not '}capped]"
+      , f"[cap={pool.cap}]"
       ] for pool in pools
     ]))
 
@@ -100,24 +100,28 @@ def do(command, *, desc, record=True):
 
   _run(command, desc=desc, record=record)
 
-def new(name, *, period, gain, capped):
+def new(name, *, rate, cap):
   """
   Create a new pool.
   :param name: The pool name
-  :param period:
-    The canonical period for the pool, e.g. '3*months'.
-    This has no effect on calculations.
-  :param gain: The value gained per period, e.g. '300'.
-  :param capped:
-    True iff the pool value is to never exceed `gain` (in magnitude).
-    This is the continuous analog to having a non-rollover discrete pool.
+  :param rate:
+    The pool rate, e.g. '100 per 2*months'
+  :param cap:
+    The pool cap (maximum value), if there is one.
+    This is the continuous analog to being non-rollover.
+    If 'none', no cap.
+    If 'gain', the cap is the rate gain.
+    If a number, that number is the cap.
   """
   name = parse_pool_name(name)
-  period = str(period)
+  gain, canonical_period = rate.split(' per ')
   gain = parse_rational(gain)
-  capped = bool(capped)
+  rate = Rational(gain, eval(canonical_period))
+  cap = (None if cap == 'none'
+        else gain if cap == 'gain'
+        else parse_rational(cap))
 
-  _run(f"pools.new({uneval(name)}, period={period}, gain={uneval(gain)}, capped={uneval(capped)})")
+  _run(f"pools.new({uneval(name)}, rate={uneval(rate)}, canonical_period={canonical_period}, cap={uneval(cap)})")
   view()
 
 def t(pool, amount, *, desc, distn="instant(t)"):

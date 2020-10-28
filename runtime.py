@@ -18,25 +18,23 @@ class Transaction:
     return self.amount * sp.integrate(self.distribution, (sp.Symbol('t'), slice.start, slice.stop))
 
 class Pool:
-  def __init__(self, *,
+  def __init__(
+    self,
     name,
-    period,
-    gain,
-    capped,
+    *,
+    rate,
+    cap,
+    canonical_period,
   ):
-    self.name = str(name)
-    self.period = Rational(period)
-    self.gain = Rational(gain)
-    self.capped = bool(capped)
+    self.name = name
+    self.rate = rate
+    self.cap = cap
+    self.canonical_period = canonical_period
 
     # Running value
     self.value = Rational(0)
     # Transaction history
     self.history = []
-
-  @property
-  def rate(self):
-    return self.gain / self.period
 
   def _simulate_idle(self, time_old, time_new):
     """ Simulate being idle over a given range of time """
@@ -51,30 +49,19 @@ class Pool:
     for tx in self.history:
       self.value += tx[time_old : time_new]
 
-    if (self.capped and
-         (  self.gain > 0 and self.value > self.gain
-         or self.gain < 0 and self.value < self.gain)):
-      self.value = self.gain
+    if (self.cap is not None and
+         (  self.cap > 0 and self.value > self.cap
+         or self.cap < 0 and self.value < self.cap)):
+      self.value = self.cap
 
 class Pools:
   def __init__(self):
     self._pools = dict()
 
-  def new(self,
-    name, *,
-    period,
-    gain,
-    capped,
-  ):
+  def new(self, name, *args, **kwargs):
     if name in self._pools:
       raise ValueError(f"There is already a pool named '{name}'")
-
-    pool = Pool(
-      name = name,
-      period = period,
-      gain = gain,
-      capped = capped,
-    )
+    pool = Pool(name, *args, **kwargs)
     self._pools[name] = pool
 
   def __getattr__(self, pool_name):
