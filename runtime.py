@@ -3,13 +3,12 @@ from rat import Rat
 class Pool:
   def __init__(self, *,
     name,
-    value,
     period,
     gain,
     capped,
   ):
     self.name = str(name)
-    self.value = Rat(value)
+    self.value = Rat(0)
     self.period = Rat(period)
     self.gain = Rat(gain)
     self.capped = bool(capped)
@@ -47,7 +46,6 @@ class Pools:
 
     pool = Pool(
       name = name,
-      value = 0,
       period = period,
       gain = gain,
       capped = capped,
