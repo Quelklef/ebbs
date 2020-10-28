@@ -120,20 +120,20 @@ def new(name, *, period, gain, capped):
   _run(f"pools.new({uneval(name)}, period={period}, gain={uneval(gain)}, capped={uneval(capped)})")
   view()
 
-def t(pool, amount, *, desc, distn="instant(x)"):
+def t(pool, amount, *, desc, distn="instant(t)"):
   """
   Record a transaction with a pool.
   :param pool: the name of the pool
   :param amount: the value delta
   :param desc: transaction description
-  :param distn: transaction distribution  [default: "instant(x)"]
+  :param distn: transaction distribution  [default: "instant(t)"]
   """
   pool = parse_pool_name(pool)
   amount = parse_rational(amount)
   desc = str(desc)
   distn = str(distn)
 
-  shifted_distn = f"sp.Lambda(x, {distn})(x - {now()})"
+  shifted_distn = f"sp.Lambda(t, {distn})(t - {now()})"
   _run(f"pools.{pool}.history.append(Transaction({uneval(amount)}, {shifted_distn}))", desc=desc)
   view()
 

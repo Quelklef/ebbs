@@ -10,12 +10,12 @@ class Transaction:
     self.amount = amount
     self.distribution = distribution
 
-    area = sp.integrate(distribution, (sp.Symbol('x'), -sp.oo, sp.oo))
+    area = sp.integrate(distribution, (sp.Symbol('t'), -sp.oo, sp.oo))
     if area != 1:
       raise ValueError(f"Given distribution is not normalized: {distribution}")
 
   def __getitem__(self, slice):
-    return self.amount * sp.integrate(self.distribution, (sp.Symbol('x'), slice.start, slice.stop))
+    return self.amount * sp.integrate(self.distribution, (sp.Symbol('t'), slice.start, slice.stop))
 
 class Pool:
   def __init__(self, *,
@@ -101,7 +101,7 @@ months  = month
 years   = year
 
 # Convenience values for making distributions
-x = sp.Symbol('x')
+t = sp.Symbol('t')
 # v Point distribution on [0, 0]
 instant = sp.DiracDelta
 # v Exponential distribution on [0, oo)
