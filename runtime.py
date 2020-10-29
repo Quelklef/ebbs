@@ -1,6 +1,16 @@
 from sympy import Rational
 import sympy as sp
 
+def _integrate(expr, opts):
+  # For some reason, sympy's builtin definite integration is being very slow.
+  # In particular, it chokes on stuff like exp(t - 100000000), even with manual=True.
+  # This function is to counteract that.
+  var, lo, hi = opts
+  i = sp.integrate(expr, var)
+  # v Define Heaviside(0) = 0 so that the integral of DiracDelta over [0, oo) is 1
+  i = i.replace(sp.Heaviside(0), 0)
+  return i.subs(var, hi) - i.subs(var, lo)
+
 class Pool:
   def __init__(self, name, *, rate, cap, canonical_period):
     self.name = name
@@ -15,10 +25,10 @@ class Pool:
 
   def modified_rate(self, time):
     """ Return the pool rate, taking into account ongoing transactions """
-    return self.rate + sum(sp.diff(tx).subs(t, time) for tx in self.history)
+    return self.rate + sum(tx.subs(t, time) for tx in self.history)
 
   def transact(self, amount, distribution):
-    area = sp.integrate(distribution, (sp.Symbol('t'), -sp.oo, sp.oo))
+    area = _integrate(distribution, (sp.Symbol('t'), -sp.oo, sp.oo))
     if area != 1:
       raise ValueError(f"Given distribution is not normalized: {distribution}")
 
@@ -35,10 +45,7 @@ class Pool:
 
     # Gain from transactions
     for tx in self.history:
-      gain = sp.integrate(tx, (sp.Symbol('t'), time_old, time_new))
-      # v Define Heaviside(0) = 0 so that the integral of DiracDelta over [0, oo) is 1
-      gain = gain.replace(sp.Heaviside(0), 0)
-      self.value += gain
+      self.value += _integrate(tx, (sp.Symbol('t'), time_old, time_new))
 
     if (self.cap is not None and
          (  self.cap > 0 and self.value > self.cap

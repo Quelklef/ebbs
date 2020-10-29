@@ -12,25 +12,19 @@ Time constants, defined as:
   a month is 1/12 of a year (the average month)
 
 Time values are reified at runtime as python/sympy
-numbers, where the unit is *year*. In other words, the
-integer `10` represents 10 years.
-
-If this seems silly, that's fair. I would rather do it
-in terms of seconds or minutes. However, for some reason
-sympy chokes when doing integration that involves large
-constants, but not when doing integration that involves
-rational numbers with large denominators. So, here we are.
+numbers, where the unit is *second*. In other words, the
+integer `10` represents 10 seconds.
 """
-year = Rational(1)
+second = Rational(1)
+minute = second * 60
+hour = minute * 60
+day = hour * 24
+week = 7 * day
+year = day * Rational('365.2422')
 month = year / 12
-day = year / Rational('365.2422')
-week = day * 7
-hour = day / 24
-minute = hour / 60
-second = minute / 60
 
 def now():
-  return int(time.time()) * second
+  return int(time.time())
 
 def format_as_duration(time_delta):
   """
