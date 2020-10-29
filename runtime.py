@@ -1,10 +1,13 @@
 from sympy import Rational
 import sympy as sp
+t = sp.Symbol('t')
 
 def _integrate(expr, opts):
   # For some reason, sympy's builtin definite integration is being very slow.
   # In particular, it chokes on stuff like exp(t - 100000000), even with manual=True.
-  # This function is to counteract that.
+  # Unfortunately, these are exactly the kinds of functions that we want to integrate.
+  # This function is to counteract that. It does definite integration by evaluating
+  # the indefinite integral at its endpoints.
   var, lo, hi = opts
   i = sp.integrate(expr, var)
   # v Define Heaviside(0) = 0 so that the integral of DiracDelta over [0, oo) is 1
@@ -28,8 +31,6 @@ class Pool:
     return self.rate + sum(tx.subs(t, time) for tx in self.history)
 
   def transact(self, *, amount, distn, time):
-    t = sp.Symbol('t')
-
     area = _integrate(distn, (t, -sp.oo, sp.oo))
     if area != 1:
       raise ValueError(f"Given distribution is not normalized: {distn}")
@@ -90,7 +91,6 @@ months  = month
 years   = year
 
 # Convenience values for making distributions
-t = sp.Symbol('t')
 # v Point distribution on [0, 0]
 instant = sp.DiracDelta(t)
 # v Exponential decay on [0, oo)
