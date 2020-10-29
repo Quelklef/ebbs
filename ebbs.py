@@ -64,7 +64,6 @@ def _run(user_command, *, desc=None, record=True):
   try:
     exec(full_command, globals())
   except Exception:
-    traceback.print_exc()
     raise
   else:
     if record:
@@ -124,7 +123,7 @@ def new(name, *, rate, cap):
   _run(f"pools.new({uneval(name)}, rate={uneval(rate)}, canonical_period={canonical_period}, cap={uneval(cap)})")
   view()
 
-def t(pool, amount, *, desc, distn="instant(t)"):
+def tn(pool, amount, *, desc, distn="instant(t)"):
   """
   Record a transaction with a pool.
   :param pool: the name of the pool

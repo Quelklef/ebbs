@@ -2,11 +2,7 @@ from sympy import Rational
 import sympy as sp
 
 class Transaction:
-  def __init__(
-    self,
-    amount,
-    distribution,
-  ):
+  def __init__(self, amount, distribution):
     self.amount = amount
     self.distribution = distribution
 
@@ -15,17 +11,14 @@ class Transaction:
       raise ValueError(f"Given distribution is not normalized: {distribution}")
 
   def __getitem__(self, slice):
-    return self.amount * sp.integrate(self.distribution, (sp.Symbol('t'), slice.start, slice.stop))
+    t = sp.Symbol('t')
+    portion = sp.integrate(self.distribution, (t, slice.start, slice.stop))
+    # v Define Heaviside(0) = 0 so that the integral of DiracDelta on [0, oo) is 1
+    portion = portion.replace(sp.Heaviside(0), 0)
+    return self.amount * portion
 
 class Pool:
-  def __init__(
-    self,
-    name,
-    *,
-    rate,
-    cap,
-    canonical_period,
-  ):
+  def __init__(self, name, *, rate, cap, canonical_period):
     self.name = name
     self.rate = rate
     self.cap = cap
@@ -101,7 +94,7 @@ uniform = lambda var, range: sp.Piecewise((0, var < 0), (0, var > range), (sp.Ra
 
 pools = Pools()
 
-ebbs_time = 0
+ebbs_time = -sp.oo
 
 def pin(new_time):
   global ebbs_time
