@@ -9,10 +9,11 @@ def _integrate(expr, opts):
   # This function is to counteract that. It does definite integration by evaluating
   # the indefinite integral at its endpoints.
   var, lo, hi = opts
-  i = sp.integrate(expr, var)
+  antideriv = sp.integrate(expr, var)
+  result = antideriv.subs(var, hi) - antideriv.subs(var, lo)
   # v Define Heaviside(0) = 0 so that the integral of DiracDelta over [0, oo) is 1
-  i = i.replace(sp.Heaviside(0), 0)
-  return i.subs(var, hi) - i.subs(var, lo)
+  result = result.replace(sp.Heaviside(0), 0)
+  return result
 
 class Pool:
   def __init__(self, name, *, rate, cap, canonical_period):
@@ -33,7 +34,7 @@ class Pool:
   def transact(self, *, amount, distn, time):
     area = _integrate(distn, (t, -sp.oo, sp.oo))
     if area != 1:
-      raise ValueError(f"Given distribution is not normalized: {distn}")
+      raise ValueError(f"Given distribution is not normalized: {distn} (area = {area})")
 
     # Amplify the distribution by `amount` and shift it to its time
     final_distn = amount * distn.replace(t, t - time)
@@ -50,7 +51,7 @@ class Pool:
 
     # Gain from transactions
     for tx in self.history:
-      self.value += _integrate(tx, (sp.Symbol('t'), time_old, time_new))
+      self.value += _integrate(tx, (t, time_old, time_new))
 
     if (self.cap is not None and
          (  self.cap > 0 and self.value > self.cap
