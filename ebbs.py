@@ -27,14 +27,22 @@ def parse_pool_name(string):
     raise ValueError(f"The following chars are not allowed in pool names: {invalid}")
   return string
 
+def parse_decimal(string):
+  """ Parses e.g. 1.5 into Rational(3, 2) """
+  if '.' in string:
+    whole, frac = string.split('.')
+    base = 10 ** len(frac)
+    return sp.Rational(int(whole) * base + int(frac), base)
+  else:
+    return sp.Integer(int(string))
+
 def parse_rational(string):
+  """ Parses e.g. 3.5/4 into Rational(7, 8) """
   if '/' in string:
     num, den = string.split('/')
-    num, den = int(num), int(den)
-    return sp.Rational(num, den)
+    return sp.Rational(parse_decimal(num), parse_decimal(den))
   else:
-    val = int(string)
-    return sp.Integer(val)
+    return parse_decimal(string)
 
 def uneval(value):
   """ Return python code evaluating to a given value """
