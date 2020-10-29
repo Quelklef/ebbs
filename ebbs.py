@@ -135,7 +135,7 @@ def tn(pool, amount, *, desc, distn="instant"):
   desc = str(desc)
   distn = str(distn)
 
-  _run(f"pools.{pool}.transact(amount={uneval(amount)}, distn={distn}, time={util.now()})", desc=desc)
+  _run(f"pools.{pool}.transact(amount={uneval(amount)}, time={util.now()}, distn={distn})", desc=desc)
   view()
 
 
