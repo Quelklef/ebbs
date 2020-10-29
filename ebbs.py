@@ -80,7 +80,7 @@ def view():
     print(util.format_grid([
       [ f"{pool.name}:"
       , round(pool.value, 2)
-      , f"(+{round(pool.rate * pool.canonical_period, 2)}/{util.format_as_duration(pool.canonical_period)})"
+      , f"(+ {round(pool.modified_rate(now()) * pool.canonical_period, 2)} | {round(pool.rate * pool.canonical_period, 2)} /{util.format_as_duration(pool.canonical_period)})"
       , ' '*5
       , f"[cap={pool.cap}]"
       ] for pool in pools
@@ -123,20 +123,20 @@ def new(name, *, rate, cap):
   _run(f"pools.new({uneval(name)}, rate={uneval(rate)}, canonical_period={canonical_period}, cap={uneval(cap)})")
   view()
 
-def tn(pool, amount, *, desc, distn="instant(t)"):
+def tn(pool, amount, *, desc, distn="instant"):
   """
   Record a transaction with a pool.
   :param pool: the name of the pool
   :param amount: the value delta
   :param desc: transaction description
-  :param distn: transaction distribution  [default: "instant(t)"]
+  :param distn: transaction distribution  [default: "instant"]
   """
   pool = parse_pool_name(pool)
   amount = parse_rational(amount)
   desc = str(desc)
   distn = str(distn)
 
-  shifted_distn = f"sp.Lambda(t, {distn})(t - {now()})"
+  shifted_distn = f"({distn}).replace(t, t - {now()})"
   _run(f"pools.{pool}.transact({uneval(amount)}, {shifted_distn})", desc=desc)
   view()
 

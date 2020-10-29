@@ -1,22 +1,6 @@
 from sympy import Rational
 import sympy as sp
 
-class Transaction:
-  def __init__(self, amount, distribution):
-    self.amount = amount
-    self.distribution = distribution
-
-    area = sp.integrate(distribution, (sp.Symbol('t'), -sp.oo, sp.oo))
-    if area != 1:
-      raise ValueError(f"Given distribution is not normalized: {distribution}")
-
-  def __getitem__(self, slice):
-    t = sp.Symbol('t')
-    portion = sp.integrate(self.distribution, (t, slice.start, slice.stop))
-    # v Define Heaviside(0) = 0 so that the integral of DiracDelta on [0, oo) is 1
-    portion = portion.replace(sp.Heaviside(0), 0)
-    return self.amount * portion
-
 class Pool:
   def __init__(self, name, *, rate, cap, canonical_period):
     self.name = name
@@ -29,8 +13,17 @@ class Pool:
     # Transaction history
     self.history = []
 
-  def transact(self, *args, **kwargs):
-    self.history.append(Transaction(*args, **kwargs))
+  def modified_rate(self, time):
+    """ Return the pool rate, taking into account ongoing transactions """
+    return self.rate + sum(sp.diff(tx).subs(t, time) for tx in self.history)
+
+  def transact(self, amount, distribution):
+    input(distribution)
+    area = sp.integrate(distribution, (sp.Symbol('t'), -sp.oo, sp.oo))
+    if area != 1:
+      raise ValueError(f"Given distribution is not normalized: {distribution}")
+
+    self.history.append(distribution * amount)
 
   def _simulate_idle(self, time_old, time_new):
     """ Simulate being idle over a given range of time """
@@ -43,7 +36,10 @@ class Pool:
 
     # Gain from transactions
     for tx in self.history:
-      self.value += tx[time_old : time_new]
+      gain = sp.integrate(tx, (sp.Symbol('t'), time_old, time_new))
+      # v Define Heaviside(0) = 0 so that the integral of DiracDelta over [0, oo) is 1
+      gain = gain.replace(sp.Heaviside(0), 0)
+      self.value += gain
 
     if (self.cap is not None and
          (  self.cap > 0 and self.value > self.cap
@@ -86,11 +82,11 @@ years   = year
 # Convenience values for making distributions
 t = sp.Symbol('t')
 # v Point distribution on [0, 0]
-instant = sp.DiracDelta
-# v Exponential distribution on [0, oo)
-exponential = lambda var: sp.Piecewise((0, var < 0), (sp.exp(var), var >= 0))
+instant = sp.DiracDelta(t)
+# v Exponential decay on [0, oo)
+decay = lambda k: sp.Piecewise((0, t < 0), (sp.exp(-t / k) / k, t >= 0))
 # v Uniform distribution on [0, range]
-uniform = lambda var, range: sp.Piecewise((0, var < 0), (0, var > range), (sp.Rational(1, range), True))
+uniform = lambda k: sp.Piecewise((0, t < 0), (0, t > k), (sp.Rational(1, k), True))
 
 pools = Pools()
 
