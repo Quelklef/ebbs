@@ -18,10 +18,6 @@ diary_file = open(diary_file_path, 'a')
 
 import diary
 
-def now():
-  return int(time.time())
-
-
 # -- Parsers and unevalrs -- #
 
 def parse_pool_name(string):
@@ -60,7 +56,7 @@ def uneval(value):
 
 def _run(user_command, *, desc=None, record=True):
   desc = desc or "(no description)"
-  full_command = f'\n# {desc}\npin({now()})\n{user_command}\n'
+  full_command = f'\n# {desc}\npin({uneval(util.now())})\n{user_command}\n'
   try:
     exec(full_command, globals())
   except Exception:
@@ -76,11 +72,11 @@ def view():
   if len(pools) == 0:
     print("No pools. Use `ebbs new` to make one.")
   else:
-    pin(now())
+    pin(util.now())
     print(util.format_grid([
       [ f"{pool.name}:"
       , round(pool.value, 2)
-      , f"(+ {round(pool.modified_rate(now()) * pool.canonical_period, 2)} | {round(pool.rate * pool.canonical_period, 2)} /{util.format_as_duration(pool.canonical_period)})"
+      , f"(+ {round(pool.modified_rate(uneval(util.now())) * pool.canonical_period, 2)} | {round(pool.rate * pool.canonical_period, 2)} /{util.format_as_duration(pool.canonical_period)})"
       , ' '*5
       , f"[cap={pool.cap}]"
       ] for pool in pools
@@ -136,7 +132,7 @@ def tn(pool, amount, *, desc, distn="instant"):
   desc = str(desc)
   distn = str(distn)
 
-  shifted_distn = f"({distn}).replace(t, t - {now()})"
+  shifted_distn = f"({distn}).replace(t, t - {uneval(util.now())})"
   _run(f"pools.{pool}.transact({uneval(amount)}, {shifted_distn})", desc=desc)
   view()
 

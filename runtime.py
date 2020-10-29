@@ -18,7 +18,6 @@ class Pool:
     return self.rate + sum(sp.diff(tx).subs(t, time) for tx in self.history)
 
   def transact(self, amount, distribution):
-    input(distribution)
     area = sp.integrate(distribution, (sp.Symbol('t'), -sp.oo, sp.oo))
     if area != 1:
       raise ValueError(f"Given distribution is not normalized: {distribution}")

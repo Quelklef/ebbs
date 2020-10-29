@@ -1,12 +1,36 @@
 from sympy import Rational
 
-second = 1
-minute = second * 60
-hour   = minute * 60
-day    = hour   * 24
-week   = day    * 7
-year   = day    * Rational('365.2422')  # the average year
-month  = year   / 12  # the average month
+import time
+
+"""
+Time constants, defined as:
+  a minute is 60 seconds
+  an hour is 60 minutes
+  a day is 24 hours
+  a week is 7 days
+  a year is 365.2422 days (the average year)
+  a month is 1/12 of a year (the average month)
+
+Time values are reified at runtime as python/sympy
+numbers, where the unit is *year*. In other words, the
+integer `10` represents 10 years.
+
+If this seems silly, that's fair. I would rather do it
+in terms of seconds or minutes. However, for some reason
+sympy chokes when doing integration that involves large
+constants, but not when doing integration that involves
+rational numbers with large denominators. So, here we are.
+"""
+year = Rational(1)
+month = year / 12
+day = year / Rational('365.2422')
+week = day * 7
+hour = day / 24
+minute = hour / 60
+second = minute / 60
+
+def now():
+  return int(time.time()) * second
 
 def format_as_duration(time_delta):
   """
