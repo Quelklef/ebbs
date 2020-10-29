@@ -1,4 +1,5 @@
 from sympy import Rational
+import sympy as sp
 
 import time
 
@@ -26,10 +27,15 @@ month = year / 12
 def now():
   return int(time.time())
 
+def format_rate(rate, period):
+  """ Format a rate nicely """
+  gain = sp.S(rate * period).evalf()
+  gain_str = f"{gain:+.1f}"
+  period_str = format_as_duration(period)
+  return f"{gain_str}/{period_str}"
+
 def format_as_duration(time_delta):
-  """
-  Format a time delta (in seconds) as a nicely-readable duration
-  """
+  """ Format a time delta (in seconds) as a nicely-readable duration """
   time_delta = Rational(time_delta)
   units = [(second, 'sec'), (minute, 'min'), (hour, 'hr'), (day, 'day'), (week, 'wk'), (month, 'mo'), (year, 'yr'), (float('inf'), 'X')]
   for (unit_val, unit_tag), (next_unit_val, _) in zip(units, units[1:]):

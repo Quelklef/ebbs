@@ -66,21 +66,24 @@ def _run(user_command, *, desc=None, record=True):
       diary_file.write(full_command)
 
 def view():
-  """
-  View the current state.
-  """
+  """ View the current state. """
   if len(pools) == 0:
     print("No pools. Use `ebbs new` to make one.")
   else:
     pin(util.now())
-    print(util.format_grid([
-      [ f"{pool.name}:"
-      , round(pool.value, 2)
-      , f"({round(pool.modified_rate(util.now()) * pool.canonical_period, 2)} | {round(pool.rate * pool.canonical_period, 2)} /{util.format_as_duration(pool.canonical_period)})"
-      , ' '*5
-      , f"[cap={pool.cap}]"
-      ] for pool in pools
-    ]))
+
+    def pool_to_row(pool):
+      return (
+        [ f"{pool.name}"
+        , ":"
+        , round(pool.value, 2)
+        , util.format_rate(pool.modified_rate(util.now()), pool.canonical_period)
+        , (pool.modified_rate(util.now()) != pool.rate) * f"(base {util.format_rate(pool.rate, pool.canonical_period)})"
+        , (pool.cap is not None) * f"[cap={pool.cap}]"
+        ])
+
+    grid = list(map(pool_to_row, pools))
+    print(util.format_grid(grid))
 
 def do(command, *, desc, record=True):
   """
