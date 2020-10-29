@@ -27,12 +27,16 @@ class Pool:
     """ Return the pool rate, taking into account ongoing transactions """
     return self.rate + sum(tx.subs(t, time) for tx in self.history)
 
-  def transact(self, amount, distribution):
-    area = _integrate(distribution, (sp.Symbol('t'), -sp.oo, sp.oo))
-    if area != 1:
-      raise ValueError(f"Given distribution is not normalized: {distribution}")
+  def transact(self, *, amount, distn, time):
+    t = sp.Symbol('t')
 
-    self.history.append(distribution * amount)
+    area = _integrate(distn, (t, -sp.oo, sp.oo))
+    if area != 1:
+      raise ValueError(f"Given distribution is not normalized: {distn}")
+
+    # Amplify the distribution by `amount` and shift it to its time
+    final_distn = amount * distn.replace(t, t - time)
+    self.history.append(final_distn)
 
   def _simulate_idle(self, time_old, time_new):
     """ Simulate being idle over a given range of time """
