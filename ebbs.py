@@ -73,20 +73,24 @@ def _run(user_command, *, desc=None, record=True):
     if record:
       diary_file.write(full_command)
 
-def view():
-  """ View the current state. """
+def view(*, project='0'):
+  """
+  View the current state.
+  :param project: if given, will show the result not for the current time but for some time into the future, e.g. '1*day'
+  """
   if len(pools) == 0:
     print("No pools. Use `ebbs new` to make one.")
   else:
-    pin(util.now())
+    now_time = util.now() + eval(project)
+    pin(now_time)
 
     def pool_to_row(pool):
       return (
         [ f"{pool.name}"
         , ":"
         , round(pool.value, 2)
-        , util.format_rate(pool.modified_rate(util.now()), pool.canonical_period)
-        , (pool.modified_rate(util.now()) != pool.rate) * f"(base {util.format_rate(pool.rate, pool.canonical_period)})"
+        , util.format_rate(pool.modified_rate(now_time), pool.canonical_period)
+        , (pool.modified_rate(now_time) != pool.rate) * f"(base {util.format_rate(pool.rate, pool.canonical_period)})"
         , (pool.cap is not None) * f"[cap={pool.cap}]"
         ])
 
