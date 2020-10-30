@@ -29,7 +29,11 @@ class Pool:
 
   def modified_rate(self, time):
     """ Return the pool rate, taking into account ongoing transactions """
-    return self.rate + sum(tx.subs(t, time) for tx in self.history)
+    def get_tx_rate(tx):
+      # v Find the value of the transaction at the given time
+      #   Assign DiracDelta to 0; we're not interested in infinite rates.
+      return tx.replace(sp.DiracDelta(sp.Wild('x')), 0).subs(t, time)
+    return self.rate + sum(map(get_tx_rate, self.history))
 
   def transact(self, *, amount, distn, time):
     area = _integrate(distn, (t, -sp.oo, sp.oo))
