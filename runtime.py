@@ -16,10 +16,10 @@ def _integrate(expr, opts):
   return result
 
 class Pool:
-  def __init__(self, name, *, rate, cap, canonical_period):
+  def __init__(self, name, *, rate, max_display_val, canonical_period):
     self.name = name
     self.rate = rate
-    self.cap = cap
+    self.max_display_val = max_display_val
     self.canonical_period = canonical_period
 
     # Running value
@@ -56,11 +56,6 @@ class Pool:
     # Gain from transactions
     for tx in self.history:
       self.value += _integrate(tx, (t, time_old, time_new))
-
-    if (self.cap is not None and
-         (  self.cap > 0 and self.value > self.cap
-         or self.cap < 0 and self.value < self.cap)):
-      self.value = self.cap
 
 class Pools:
   def __init__(self):
