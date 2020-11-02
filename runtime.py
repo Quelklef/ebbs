@@ -67,6 +67,9 @@ class Pools:
     pool = Pool(name, *args, **kwargs)
     self._pools[name] = pool
 
+  def __getitem__(self, pool_name):
+    return self._pools[pool_name]
+
   def __getattr__(self, pool_name):
     try:
       return self._pools[pool_name]

@@ -100,6 +100,25 @@ def view(*, project='0', period=None):
     grid = list(map(pool_to_row, pools))
     print(util.format_grid(grid))
 
+def time_til(pool_name, target_value):
+  """
+  Calculate how long till a pool is at a desired value.
+  :param pool_name: the pool name
+  :param target_value: the value
+  """
+  pool_name = parse_pool_name(pool_name)
+  target_value = parse_rational(target_value)
+
+  pin(util.now())
+  pool = pools[pool_name]
+  wait_time = (target_value - pool.value) / pool.modified_rate(util.now())
+
+  if wait_time < 0:
+    print("This pool is already at or above the target value")
+  else:
+    print(util.format_as_duration(wait_time))
+
+
 def do(command, *, desc, record=True):
   """
   Run a raw Python command
