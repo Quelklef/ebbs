@@ -92,7 +92,7 @@ def view(*, project='0', period=None):
       return (
         [ f"{pool.name}"
         , ":"
-        , round(pool.value, 2) if pool.value <= pool.max_display_val else '>' + str(round(pool.max_display_val), 2)
+        , round(pool.value, 2) if pool.value <= pool.max_display_val else '>' + str(round(pool.max_display_val, 2))
         , util.format_rate(pool.modified_rate(now_time), period or pool.canonical_period)
         , (pool.modified_rate(now_time) != pool.rate) * f"(base {util.format_rate(pool.rate, period or pool.canonical_period)})"
         ])
