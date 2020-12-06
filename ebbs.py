@@ -51,6 +51,8 @@ def uneval(value):
   defer_to_repr = [str, int, bool, type(None)]
   if any(isinstance(value, t) for t in defer_to_repr):
     return repr(value)
+  elif value == sp.oo:
+    return "sp.oo"
   elif isinstance(value, sp.Integer):
     return f"Rational({value})"
   elif isinstance(value, sp.Rational):
@@ -132,28 +134,22 @@ def do(command, *, desc, record=True):
 
   _run(command, desc=desc, record=record)
 
-def new(name, *, rate, cap):
+def new(name, *, rate, max_display_val):
   """
   Create a new pool.
   :param name: The pool name
-  :param rate:
-    The pool rate, e.g. '100 per 2*months'
-  :param cap:
-    The pool cap (maximum value), if there is one.
-    This is the continuous analog to being non-rollover.
-    If 'none', no cap.
-    If 'gain', the cap is the rate gain.
-    If a number, that number is the cap.
+  :param rate: The pool rate, e.g. '100 per 2*months'
+  :param max_display_val: The maxmimum value to display in this pool
   """
   name = parse_pool_name(name)
   gain, canonical_period = rate.split(' per ')
   gain = parse_rational(gain)
   rate = Rational(gain, eval(canonical_period))
-  cap = (None if cap == 'none'
-        else gain if cap == 'gain'
-        else parse_rational(cap))
+  max_display_val = (sp.oo if max_display_val == 'none'
+        else gain if max_display_val == 'gain'
+        else parse_rational(max_display_val))
 
-  _run(f"pools.new({uneval(name)}, rate={uneval(rate)}, canonical_period={canonical_period}, cap={uneval(cap)})")
+  _run(f"pools.new({uneval(name)}, rate={uneval(rate)}, canonical_period={canonical_period}, max_display_val={uneval(max_display_val)})")
   view()
 
 def tn(pool, amount, *, desc, distn="instant"):
