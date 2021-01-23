@@ -17,10 +17,12 @@ export function finite(x : Bound) : x is Rational.T {
 }
 
 export function add(x : Bound, y : Bound) : Bound {
-  if (nonfinite(x) || nonfinite(y)) {
+  if (nonfinite(x) && nonfinite(y)) {
     if (x === y) return x;
     else throw Error('Cannot add +inf to -inf');
   }
+  if (nonfinite(x)) return x;
+  if (nonfinite(y)) return y;
   return Rational.add(x, y);
 }
 
