@@ -57,11 +57,12 @@ export function update(model : Model.T, message : Message, now : bigint) : Model
         });
 
     case 'CreateMovement':
+      if (model.pools.length === 0) return model;
       const movement : Movement.T =
         { type : 'Movement'
         , identifier : Identifier.from(model.identifierCount)
-        , source : Identifier.nil
-        , target : Identifier.nil
+        , source : model.pools[Number( now     % BigInt(model.pools.length))].identifier
+        , target : model.pools[Number((now+1n) % BigInt(model.pools.length))].identifier
         , principle : Rational.zero
         , distribution : { type : 'DiracDelta', x : Rational.from(now) }
         , threshold : { type: 'Nothing' }

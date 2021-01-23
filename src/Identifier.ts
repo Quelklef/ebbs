@@ -5,12 +5,6 @@ interface Identifier
   , value : string
   }
 
-// naughty
-export const nil : Identifier =
-  { type : 'Identifier'
-  , value : ''
-  }
-
 export function eq(a : Identifier, b : Identifier) : boolean {
   return a.value === b.value;
 }

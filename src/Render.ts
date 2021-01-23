@@ -104,6 +104,7 @@ function renderMovement(model : Model.T, movement : Movement.T, send : Send) : H
 
   function makeEndpoint(key : string) : HTMLElement {
     const $endpoint = document.createElement('select');
+    const $nil = document.createElement('option');
     $endpoint.append(...model.pools.map(pool => {
       const $option = document.createElement('option');
       $option.innerText = pool.name;
