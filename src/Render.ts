@@ -87,11 +87,24 @@ function renderMovement(model : Model.T, movement : Movement.T, send : Send) : H
   $principleData.addEventListener('blur', () => {
     const maybePrinciple = Rational.parse($principleData.value);
     if (maybePrinciple.type !== 'Just') return;
-    send({ type : 'ModifyMovement', target : movement.identifier, delta : { principle: maybePrinciple.value } });
+    send({ type : 'ModifyMovement', target : movement.identifier, delta : { principle : maybePrinciple.value } });
   });
   const $principle = document.createElement('span');
   $principle.classList.add(':movement:principle');
   $principle.append('Amount: ', $principleData);
+
+  const $timeData = document.createElement('input');
+  $timeData.classList.add('--show-n-edit', ':movement:time:data');
+  $timeData.type = 'number';
+  $timeData.value = Rational.toDecimal(movement.time);
+  $timeData.addEventListener('blur', () => {
+    const maybeTime = Rational.parse($timeData.value);
+    if (maybeTime.type !== 'Just') return;
+    send({ type : 'ModifyMovement', target : movement.identifier, delta : { time : maybeTime.value } });
+  });
+  const $time = document.createElement('span');
+  $time.classList.add(':movement:time');
+  $time.append('Time: ', $timeData);
 
   const $distributionData = document.createElement('input');
   $distributionData.classList.add('--show-n-edit', ':movement:distribution:data');
@@ -111,7 +124,7 @@ function renderMovement(model : Model.T, movement : Movement.T, send : Send) : H
 
   const $controls = document.createElement('div');
   $controls.classList.add(':movement:controls');
-  $controls.append($source, $rarr, $target, $principle, $distribution, $delete);
+  $controls.append($source, $rarr, $target, $principle, $time, $distribution, $delete);
 
   const $movement = document.createElement('div');
   $movement.classList.add(':movement');

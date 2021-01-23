@@ -7,7 +7,6 @@ type Distribution = DiracDelta | Piecewise | Polynomial | Offset | Dilated;
 
 interface DiracDelta
   { type : 'DiracDelta'
-  , x : Rational.T
   }
 
 interface Piecewise
@@ -56,7 +55,7 @@ export function valueAt(distn : Distribution, x : Bound.T) : Bound.T {
 export function integrate(distn : Distribution, x0 : Bound.T, xf : Bound.T) : Bound.T {
   switch (distn.type) {
     case 'DiracDelta':
-      return Bound.le(x0, distn.x) && Bound.le(distn.x, xf) ? Rational.one : Rational.zero;
+      return Bound.le(x0, Rational.zero) && Bound.le(Rational.zero, xf) ? Rational.one : Rational.zero;
     case 'Piecewise':
       let result : Bound.T = Rational.zero;
       for (let i = 0; i < distn.components.length; i++) {

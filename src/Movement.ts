@@ -16,6 +16,7 @@ interface Movement
   , target : Identifier.T
   , principle : Rational.T
   , distribution : Distribution.T
+  , time : Rational.T
   , threshold : Maybe.T<bigint>  // TODO: SEMANTICS
   , tags : Array<Strymbol.T>
   , description: string
@@ -37,5 +38,16 @@ export function taken(movement : Movement, pool : Pool.T, t0 : Bound.T, tf : Bou
 
 // For a given time interval, how much value did a movement move around, in total?
 export function moved(movement : Movement, t0 : Bound.T, tf : Bound.T) : Bound.T {
-  return Bound.mul(movement.principle, Distribution.integrate(movement.distribution, t0, tf));
+  const shifted : Distribution.T = (
+    { type : 'Offset'
+    , base : movement.distribution
+    , offset : movement.time
+    });
+  const dilated : Distribution.T = (
+    { type : 'Dilated'
+    , base : shifted
+    , xDilation : Rational.one
+    , yDilation : movement.principle
+    });
+  return Distribution.integrate(dilated, t0, tf);
 }

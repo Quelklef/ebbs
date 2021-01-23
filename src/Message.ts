@@ -64,8 +64,9 @@ export function update(model : Model.T, message : Message, now : bigint) : Model
         , source : model.pools[Number( now     % BigInt(model.pools.length))].identifier
         , target : model.pools[Number((now+1n) % BigInt(model.pools.length))].identifier
         , principle : Rational.zero
-        , distribution : { type : 'DiracDelta', x : Rational.from(now) }
-        , threshold : { type: 'Nothing' }
+        , time : Rational.from(now)
+        , distribution : { type : 'DiracDelta' }
+        , threshold : { type : 'Nothing' }
         , tags : []
         , description : ''
         };

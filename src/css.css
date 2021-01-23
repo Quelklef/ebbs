@@ -110,7 +110,9 @@ select.--show-n-edit:focus
   font-weight: bold;
 }
 
-.\:movement\:principle\:data {
+.\:movement\:principle\:data,
+.\:movement\:time\:data
+{
   width: 8ch;
 }
 
